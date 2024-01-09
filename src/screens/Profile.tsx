@@ -5,11 +5,36 @@ import { useState } from 'react';
 import { TouchableOpacity } from 'react-native';
 import { Input } from '../components/Input';
 import { Button } from '../components/Button';
+import * as ImagePiker  from 'expo-image-picker';
 
 const PHOTO_SIZE = 33
 
 export function Profile() {
   const [photoIsLoading, setPhotoIsLoading] = useState<boolean>(true);
+  const [userPhoto, setUserPhoto] = useState<string>('https://github.com/willianmartins2018.png');
+
+  async function handleUserPhotoSelect() {
+    setPhotoIsLoading(false);
+    try{  
+      const photoSelected = await ImagePiker.launchImageLibraryAsync({
+        mediaTypes: ImagePiker.MediaTypeOptions.Images,
+        quality: 1,
+        aspect: [4,4],
+        allowsEditing: true,
+      });
+  
+      if (photoSelected.canceled) {
+        return;
+      }
+  
+      setUserPhoto(photoSelected.assets[0].uri);
+    
+    } catch(error) {
+      console.log(error);
+    } finally {
+      setPhotoIsLoading(true);
+    }
+  }
 
   return (
     <VStack>
@@ -25,13 +50,13 @@ export function Profile() {
             isLoaded={photoIsLoading}
           />
           {photoIsLoading && <UserPhoto
-            source={{ uri: 'https://github.com/willianmartins2018.png' }}
+            source={{ uri: userPhoto }}
             alt="Foto do Usuário"
             size={PHOTO_SIZE}
           />
           }
 
-          <TouchableOpacity>
+          <TouchableOpacity onPress={handleUserPhotoSelect}>
             <Text color="green.500" fontWeight="bold" fontSize="md" mt={2} mb={8}>
               Alterar Foto
             </Text>
